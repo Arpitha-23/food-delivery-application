@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FoodExpress - Food Delivery</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .navbar-brand {
+            font-size: 24px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #ff7a18, #ff4b2b);
+            color: white;
+            padding: 80px 20px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 20px;
+        }
+
+        .search-box {
+            max-width: 650px;
+            margin: 30px auto 0;
+        }
+
+        .restaurant-card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: 0.3s;
+            height: 100%;
+        }
+
+        .restaurant-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .restaurant-image {
+            height: 210px;
+            object-fit: cover;
+        }
+
+        .category {
+            color: #ff5722;
+            font-weight: 600;
+        }
+
+        .restaurant-info {
+            font-size: 14px;
+        }
+
+        .section-title {
+            font-weight: 700;
+        }
+
+        footer {
+            margin-top: 50px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+
+        <a class="navbar-brand fw-bold" href="{{ url_for('main.home') }}">
+            🍔 FoodExpress
+        </a>
+
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.home') }}">
+                        Home
+                    </a>
+                </li>
+
+                {% if current_user.is_authenticated %}
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.profile') }}">
+                        Profile
+                    </a>
+                </li>
+
+                <li class="nav-item ms-lg-2">
+                    <a
+                        href="{{ url_for('main.logout') }}"
+                        class="btn btn-warning btn-sm"
+                    >
+                        Logout
+                    </a>
+                </li>
+
+                {% else %}
+
+                <li class="nav-item ms-lg-2">
+                    <a
+                        href="{{ url_for('main.login') }}"
+                        class="btn btn-outline-light btn-sm"
+                    >
+                        Login
+                    </a>
+                </li>
+
+                <li class="nav-item ms-lg-2">
+                    <a
+                        href="{{ url_for('main.register') }}"
+                        class="btn btn-warning btn-sm"
+                    >
+                        Register
+                    </a>
+                </li>
+
+                {% endif %}
+
+            </ul>
+
+        </div>
+    </div>
+</nav>
+
+
+<!-- ================= FLASH MESSAGES ================= -->
+
+<div class="container mt-3">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            {% for category, message in messages %}
+
+                <div
+                    class="alert alert-{{ category }} alert-dismissible fade show"
+                    role="alert"
+                >
+                    {{ message }}
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                    ></button>
+
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    {% endwith %}
+
+</div>
+
+
+<!-- ================= HERO SECTION ================= -->
+
+<section class="hero text-center">
+
+    <div class="container">
+
+        <h1>Delicious Food, Delivered Fast 🍕</h1>
+
+        <p>
+            Order your favourite meals from the best restaurants near you.
+        </p>
+
+        <div class="search-box">
+
+            <div class="input-group input-group-lg">
+
+                <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Search for restaurants or food..."
+                >
+
+                <button class="btn btn-dark">
+                    🔍 Search
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= RESTAURANTS ================= -->
+
+<div class="container py-5">
+
+    <div class="text-center mb-5">
+
+        <h2 class="section-title">
+            🍽️ Popular Restaurants
+        </h2>
+
+        <p class="text-muted">
+            Choose a restaurant and explore its delicious menu.
+        </p>
+
+    </div>
+
+
+    {% if restaurants %}
+
+    <div class="row g-4">
+
+        {% for restaurant in restaurants %}
+
+        <div class="col-md-6 col-lg-3">
+
+            <div class="card restaurant-card shadow-sm">
+
+                <!-- Restaurant Image -->
+
+                <img
+                    src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600"
+                    class="card-img-top restaurant-image"
+                    alt="{{ restaurant.name }}"
+                >
+
+
+                <!-- Card Body -->
+
+                <div class="card-body d-flex flex-column">
+
+                    <h5 class="card-title fw-bold">
+                        {{ restaurant.name }}
+                    </h5>
+
+                    <p class="category mb-2">
+                        {{ restaurant.category }}
+                    </p>
+
+                    {% if restaurant.description %}
+
+                    <p class="text-muted small">
+                        {{ restaurant.description }}
+                    </p>
+
+                    {% endif %}
+
+
+                    <div class="restaurant-info text-muted mb-3">
+
+                        <div class="mb-1">
+                            📍 {{ restaurant.address }}
+                        </div>
+
+                        <div class="mb-1">
+                            📞 {{ restaurant.phone }}
+                        </div>
+
+                        <div>
+                            🕐 {{ restaurant.opening_time }}
+                            -
+                            {{ restaurant.closing_time }}
+                        </div>
+
+                    </div>
+
+
+                    <!-- View Menu Button -->
+
+                    <div class="mt-auto">
+
+                        <a
+                            href="{{ url_for(
+                                'main.restaurant_menu',
+                                restaurant_id=restaurant.id
+                            ) }}"
+                            class="btn btn-warning w-100 fw-bold"
+                        >
+                            🍽️ View Menu
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    {% else %}
+
+    <!-- No Restaurants -->
+
+    <div class="alert alert-info text-center">
+
+        <h5>No restaurants available</h5>
+
+        <p class="mb-0">
+            Please check again later.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer class="bg-dark text-white text-center py-4">
+
+    <div class="container">
+
+        <h5>🍔 FoodExpress</h5>
+
+        <p class="mb-1">
+            Your favourite food, delivered to your doorstep.
+        </p>
+
+        <small class="text-secondary">
+            © 2026 FoodExpress | Food Delivery Application
+        </small>
+
+    </div>
+
+</footer>
+
+
+<!-- Bootstrap JS -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+
+</body>
+
+</html>
